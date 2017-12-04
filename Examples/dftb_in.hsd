@@ -1,0 +1,37 @@
+Geometry = GenFormat {
+ <<< "bnnt.gen"
+ }
+ Driver = VelocityVerlet{
+  MovedAtoms = 1:-1
+  TimeStep [Femtosecond] = 1.0
+  Thermostat = NoseHoover {
+    Temperature [K] = TemperatureProfile {
+	constant  4001 2000 
+	}
+    CouplingStrength [cm^-1] = 3000
+  }
+  MDRestartFrequency = 200
+  Velocities [AA/ps] = {
+   <<< "veloc.dat"
+ }
+ OutputPrefix = "geo_stp"
+ }
+
+ Hamiltonian = DFTB{
+    Charge = 0
+#    SpinPolarisation{}
+#    SCC = Yes
+#    SCCTolerance = 1e-6
+#    MaxSCCIterations = 100
+#    Mixer = Broyden{}
+    MaxAngularMomentum = {
+       B = "p"
+       N = "p"
+  }
+  SlaterKosterFiles = Type2FileNames {
+    Prefix = "/gpfs/projects/predrag/lhan/executable/matsci-0-3/"
+    Separator = "-"
+    Suffix = ".skf"
+    LowerCaseTypeName = No
+  } 
+ }
