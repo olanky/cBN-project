@@ -6,13 +6,56 @@
 
 cd $PBS_O_WORKDIR
 ulimit -s unlimited
+##########
+# Simulation setup
+# The time in each DFTB run [unit: ps], should be consistent with dftb input
+# Particle type: NH: 1; N: 2; H: 3
+##########
+temperature=2000
+run_time=4
+particle_type=2
+
+#############
+# Check if geo_stp.xyz file is available, if not, try to create one for the "format" code
+#############
+if [ ! -f geo_stp.xyz ]; then
+ if [ -f traj.xyz ]; then
+  # The last snapshot (e.g. MD iter: 4000 or MD iter: 10000) is extracted from traj.xyz file
+  tail -1000 traj.xyz > geo_stp.xyz && err_file="traj.xyz"
+ elif [ -f geo_stp_*.xyz ]; then
+  # At least we need to keep a copy of xyz file (e.g. geo_stp_0.xyz) as backup
+  cp geo_stp_*.xyz geo_stp.xyz && err_file="geo_stp_*.xyz"
+ else
+  echo "xyz file not available. Please check the input for geo_stp.xyz"
+  exit 1
+ fi
+else
+ err_file="geo_stp.xyz"
+fi
+
+############
+# Test the "format" code, if code runs smoothly, job execution can be started.
+############
+ ./format 1 ${run_time} ${temperature} ${particle_type} || tmp=$?
+if [[ $tmp -gt 0 ]]; then
+ echo "Please check xyz input file"
+ if [ ! -z $err_file ]; then
+  echo "probably $err_file"
+ fi
+ echo "Format of geo_stp.xyz file:"
+ echo "line 1: atom number"
+ echo "line 2: MD iter: ${run_time}000"
+ echo "Starting coordinates in (element type, x, y, z)"
+ exit 1
+fi
+
 ############
 # Following is our common script for bombardment
 ############
 for ((i=1;i<=500;i++))
 do
-./format $i 4 2000 2 
-/gpfs/projects/KrsticGroup/executable/dftb+ > bn.log
+./format $i ${run_time} ${temperature} ${particle_type} 
+dftb+ > bn.log
 cat md.out >> thermo.log
 cat geo_stp.xyz >> traj.xyz
 wait
