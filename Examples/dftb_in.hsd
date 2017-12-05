@@ -29,7 +29,7 @@ Geometry = GenFormat {
        N = "p"
   }
   SlaterKosterFiles = Type2FileNames {
-    Prefix = "/gpfs/projects/predrag/lhan/executable/matsci-0-3/"
+    Prefix = "/PATH_TO_matsci-0-3/"
     Separator = "-"
     Suffix = ".skf"
     LowerCaseTypeName = No
